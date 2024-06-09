@@ -1,0 +1,14 @@
+@import "normalize";
+
+body {
+  height: 100%;
+}
+
+#root {
+  padding: 20px 20px 20px;
+}
+
+.radix-themes {
+  background: var(--figma-color-bg) !important;
+  min-height: 100% !important;
+}

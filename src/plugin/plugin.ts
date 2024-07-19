@@ -12,47 +12,79 @@ function bootstrap () {
 
   figma.ui.onmessage = async (message) => {
     if (message.type === 'INITIALIZE') {
-      const data = await getClientStorage('data')
-      const currentUser = figma.currentUser ? figma.currentUser.name : ''
-
-      figma.ui.postMessage({
-        type: 'INITIALIZED',
-        content: {
-          currentUser,
-          options: data.options,
-          constants: data.constants,
-          file: figma.fileKey
+      try {
+        const currentUser = figma.currentUser ?? {
+          id: '',
+          name: ''
         }
-      })
+        const token = await figma?.clientStorage?.getAsync('todo-token')
+        const data = await getClientStorage('data')
+
+        figma.ui.postMessage({
+          type: 'INITIALIZED',
+          content: {
+            ...data,
+            user: {
+              id: currentUser.id,
+              name: currentUser.name
+            },
+            token
+          }
+        })
+      } catch (e) {
+        figma.ui.postMessage({
+          type: 'ERROR',
+          content: e
+        })
+      }
     }
 
     if (message.type === 'SAVE_OPTIONS') {
-      const data = await getClientStorage('data')
-      await setClientStorage('data', {
-        ...data,
-        ...message.content
-      })
+      try {
+        const data = await getClientStorage('data')
+        await setClientStorage('data', {
+          ...data,
+          options: message.content
+        })
+      } catch (e) {
+        figma.ui.postMessage({
+          type: 'ERROR',
+          content: e
+        })
+      }
     }
 
-    if (message.type === 'SAVE_CONSTANTS') {
-      const data = await getClientStorage('data')
-      await setClientStorage('data', {
-        ...data,
-        ...message.content
-      })
-      figma.ui.postMessage({
-        type: 'SAVED_CONSTANTS',
-        content: message.content
-      })
+    if (message.type === 'SAVE_KEYS') {
+      try {
+        const data = await getClientStorage('data')
+        await figma.clientStorage.setAsync('todo-token', message.content.token)
+
+        await setClientStorage('data', {
+          ...data,
+          ...message.content
+        })
+      } catch (e) {
+        figma.ui.postMessage({
+          type: 'ERROR',
+          content: e
+        })
+      }
     }
 
     if (message.type === 'ZOOM') {
-      zoomToNode(message.content)
+      try {
+        zoomToNode(message.content)
+      } catch (e) {
+        figma.ui.postMessage({
+          type: 'ERROR',
+          content: e
+        })
+      }
     }
 
     if (message.type === 'ERROR') {
       figma.ui.postMessage({
-        type: 'ERROR_TOKEN',
+        type: 'ERROR',
         content: message.content
       })
     }

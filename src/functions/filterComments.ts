@@ -1,19 +1,23 @@
 interface FilterOptions {
   hideResolved?: boolean
   hideUnassigned?: boolean
-  username?: string
+  username?: {
+    id: string
+    name: string
+  }
   reload?: boolean
 }
 
 const processComments = (comments: any[], options: FilterOptions, currentUser: string) => {
   let filteredComments = comments
-  if (options.hideResolved) {
-    filteredComments = filteredComments.filter(comment => !comment.resolved_at)
+
+  if (options?.hideResolved) {
+    filteredComments = filteredComments.filter(comment => !comment.comments.some((c: any) => c.resolved))
   }
-  if (options.hideUnassigned) {
+  if (options?.hideUnassigned) {
     filteredComments = filteredComments.filter(comment => comment.user !== 'Unassigned')
   }
-  if (options.username) {
+  if (options?.username) {
     filteredComments = filteredComments.filter(comment => comment.user === currentUser)
   }
   return filteredComments

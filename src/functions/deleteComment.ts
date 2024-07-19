@@ -1,26 +1,22 @@
 import axios from 'axios'
 import { constants } from '../constants'
 
-async function deleteComment (commentId: string, keys: { fileKey: string, token: string }) {
-  const url = `${constants.BASE_API_URL}${keys.fileKey}/comments/${commentId}`
-
+async function deleteComment (commentId: string, {
+  fileKey,
+  token
+}: { fileKey: string, token: string }) {
   try {
-    const response = await axios.delete(url, {
-      headers: {
-        'X-Figma-Token': keys.token
-      }
+    const response = await axios.delete(`${constants.BASE_API_URL}${fileKey}/comments/${commentId}`, {
+      headers: { 'X-Figma-Token': token }
     })
     return response.status === 204
-  } catch (err) {
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: 'ERROR',
-          content: 'Error adding the reaction. Please check your token permissions, we need "write" permissions in comments.'
-        }
-      },
-      '*'
-    )
+  } catch {
+    parent.postMessage({
+      pluginMessage: {
+        type: 'ERROR',
+        content: 'Error deleting the comment. Please check your token permissions; "write" permissions in comments are required.'
+      }
+    }, '*')
   }
 }
 

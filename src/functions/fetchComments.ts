@@ -41,9 +41,8 @@ const fetchFromAPI = async (url: string, token?: string) => {
   }
 }
 
-const processComments = async (figmaComments: any[], keys: KeyOptions) => {
+const processComments = async (figmaComments: any[]) => {
   const todoComments = figmaComments.filter((comment: any) => comment.message.startsWith('TODO'))
-
   const users: Record<string, UserComment> = {
     noUser: {
       user: 'Unassigned',
@@ -55,6 +54,7 @@ const processComments = async (figmaComments: any[], keys: KeyOptions) => {
     let message = comment.message.replace('TODO', '').trim()
     let match = message.match(/@(.*?)[ ]*:/)
     let username: string
+
     if (match?.[1]) {
       username = match[1].trim()
       message = message.replace(new RegExp(`@${username}[ ]*:`), '').trim()
@@ -67,12 +67,14 @@ const processComments = async (figmaComments: any[], keys: KeyOptions) => {
         username = 'noUser'
       }
     }
+
     if (!users[username]) {
       users[username] = {
         user: username,
         comments: []
       }
     }
+
     const checked = comment.reactions.some((reaction: any) => reaction.emoji === ':white_check_mark:')
 
     users[username].comments.push({
@@ -96,7 +98,10 @@ const processComments = async (figmaComments: any[], keys: KeyOptions) => {
 const fetchComments = async (keys: KeyOptions) => {
   try {
     const response = await fetchFromAPI(`${constants.BASE_API_URL}${keys.fileKey}/comments`, keys.token)
-    return await processComments(response.comments, keys)
+    if (response.error) {
+      return response
+    }
+    return await processComments(response.comments)
   } catch (e) {
     parent.postMessage(
       {

@@ -27,6 +27,7 @@
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/no-misused-promises": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
-    "no-mixed-spaces-and-tabs": "off"
+    "no-mixed-spaces-and-tabs": "off",
+    "@typescript-eslint/no-floating-promises": "off"
   }
 }
